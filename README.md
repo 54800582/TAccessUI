@@ -1,0 +1,42 @@
+# Windows 通用控件 UI开发模板
+
+
+
+这个仓库包括一个windows 通用控件UI开发模板。该UI开发模板基于Windows 本地API，具有零依赖、轻而美、通用等特性。该开发模板来源于WintoolsSuite里的UI工具。
+
+
+
+该模板目前具有如下控件：
+
+1. 菜单栏（Menu Bar）
+2. 工具栏（Tool Bar）
+3. Rebar（放置Toolbar、QuickSearch控件的容器）
+4. 状态栏（Status Bar）
+5. 列表视图（表）
+6. 对话框 （Dialog Bar）
+
+
+
+本地Window API：
+
+1. CreateWindowEx
+2. CreateDialogParam
+3. DialogBoxParam
+4. SendMessage
+5. MoveWindow
+6. SetWindowPos
+7. GetClientRect/GetWindowRect/ScreenToClient
+8. WindowProc（窗口过程）
+9. DialogProc（对话框过程）
+   
+
+WM\_SIZE消息：
+
+基于MFC开发的UI，当UI窗口尺寸发生变化时，MFC会自动基于UI上控件的初始布局来缩放控件。而当基于本地Windows API开发的UI，需要处理WM\_SIZE消息，手动重新调整那些随UI大小变化的控件。当调整子控件的大小时，使用GetClientRect API来获取父控件的工作区，使用GetWindowRect来获取子控件相对于屏幕的坐标和尺寸，然后使用ScreenToClient来将子控件的坐标转换为相对于父控件的坐标，以使用MoveWindow/SetWindowPos API来重新设置子控件的位置和大小。
+
+
+
+开发环境：
+
+1. Windows 11
+2. Microsoft Visual Studio Community 2022

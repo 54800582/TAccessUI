@@ -1,0 +1,7 @@
+/.vs
+*.obj
+/TAccessUI/*/debug
+/TAccessUI/*/releasae
+/*/debug
+/*/release
+*.aps
