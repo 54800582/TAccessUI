@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +52,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -136,6 +138,7 @@
     <ClInclude Include="basedlg.h" />
     <ClInclude Include="basewind.h" />
     <ClInclude Include="cpyright.h" />
+    <ClInclude Include="dlgrewards.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="quicksch.h" />
     <ClInclude Include="Resource.h" />
@@ -150,6 +153,7 @@
     <ClCompile Include="basedlg.cpp" />
     <ClCompile Include="basewind.cpp" />
     <ClCompile Include="cpyright.cpp" />
+    <ClCompile Include="dlgrewards.cpp" />
     <ClCompile Include="quicksch.cpp" />
     <ClCompile Include="TAccessUI.cpp" />
     <ClCompile Include="taccssvw.cpp" />

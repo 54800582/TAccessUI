@@ -30,6 +30,12 @@ using namespace std;
 #include <map>
 
 
+#pragma comment(lib, "UxTheme.lib")
+#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "Gdi32.lib")
+
+
 
 //设置控件风格
 #ifdef _UNICODE

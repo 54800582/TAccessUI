@@ -22,12 +22,17 @@
 #define IDI_QUICKFILTER                 135
 #define IDI_TALOGO                      136
 #define IDI_CLOSE                       138
+#define IDD_DLG_REWARD                  140
 #define IDC_EDT_QUICKSEARCH             1000
 #define IDC_TA_ICON                     1000
 #define IDC_TA_PRODUCTNAME              1001
 #define IDC_TA_PUBLISHER                1002
 #define IDC_TA_HLINK                    1003
 #define IDC_BTN_X                       1004
+#define IDC_TA_FEEDBACK                 1005
+#define IDC_BTN_THANKS                  1006
+#define IDC_REWARDS_INFO                1007
+#define IDC_STATIC_RELEASE				1008
 #define IDM_RUNAS_ADMIN                 32775
 #define IDM_REFRESH                     32776
 #define IDM_QUICKFIND                   32782
@@ -42,9 +47,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1005
+#define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

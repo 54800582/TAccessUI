@@ -1,5 +1,5 @@
 ﻿#include "cpyright.h"
-
+#include "dlgrewards.h"
 CDlgCopyright::CDlgCopyright()
 {
 
@@ -68,13 +68,22 @@ void CDlgCopyright::OnInitialUpdate()
 
     SetDlgItemText(GetHwnd(), IDC_TA_PUBLISHER, _T("Copyright © 2025 T.Access"));
     SetDlgItemText(GetHwnd(), IDC_TA_PRODUCTNAME, _T("TAcess通用Window UI框架 v1.0"));
+    SetDlgItemText(GetHwnd(), IDC_STATIC_RELEASE, __DATE__ _T(" Release"));
     SetDlgItemText(GetHwnd(), IDC_TA_HLINK,
-        _T("<a HREF=\"https://github.com/54800582/wintools\">T.Access - https://github.com/54800582/wintools</a>"));
+        _T("<a HREF=\"https://github.com/54800582/wintools\">更多工具下载: T.Access - https://github.com/54800582/wintools</a>"));
+    SetDlgItemText(GetHwnd(), IDC_TA_FEEDBACK, _T("反馈(微信号): lswq369 (心无)"));
 
     if (m_hDpiFont == NULL)
     {
         m_hDpiFont = CreateFont(GetHwnd());
     }
+
+    RECT rcControl;
+    GetWindowRect(GetDlgItem(GetHwnd(), IDC_TA_FEEDBACK), &rcControl);
+    ScreenToClient(GetHwnd(), (LPPOINT)&rcControl.left);  //转换为相对父控件的坐标
+    ScreenToClient(GetHwnd(), (LPPOINT)&rcControl.right);
+
+    m_dwHeight = rcControl.bottom + 8;
 }
 
 LRESULT CDlgCopyright::OnReceiveMessage(UINT msg, WPARAM wParam, LPARAM lParam)
@@ -95,6 +104,12 @@ LRESULT CDlgCopyright::OnReceiveMessage(UINT msg, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(GetParent(GetHwnd()), nullptr, TRUE);
                 SendMessage(GetParent(GetHwnd()), WM_SIZE, 0, 0);
                 return TRUE;
+            case IDC_BTN_THANKS:
+            {
+                CDlgRewards dlgRewards;
+                DialogBoxParam(nullptr, MAKEINTRESOURCE(IDD_DLG_REWARD), GetHwnd(), CBaseDlg::DlgProc, (LPARAM)&dlgRewards);
+                break;
+            }
             default:
                 break;
             }
@@ -173,6 +188,13 @@ void CDlgCopyright::OnSize(WPARAM wParam, LPARAM lParam)
     SetWindowPos(GetDlgItem(GetHwnd(), IDC_BTN_X), nullptr, rcWindow.right - width -8, rcControl.top,
            width, height, SWP_NOZORDER);
 
-    //MoveWindow(GetDlgItem(GetHwnd(), IDC_EDT_EVTINFO), rcControl.left, rcControl.top,
-      //  width, height, true);
+    GetWindowRect(GetDlgItem(GetHwnd(), IDC_BTN_THANKS), &rcControl);
+    ScreenToClient(GetHwnd(), (LPPOINT)&rcControl.left);  //转换为相对父控件的坐标
+    ScreenToClient(GetHwnd(), (LPPOINT)&rcControl.right);
+
+    UINT width1 = rcControl.right - rcControl.left;
+    height = rcControl.bottom - rcControl.top;
+    SetWindowPos(GetDlgItem(GetHwnd(), IDC_BTN_THANKS), nullptr, rcWindow.right - width - width1 - 12, rcControl.top,
+        width1, height, SWP_NOZORDER);
+
 }

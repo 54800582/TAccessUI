@@ -183,6 +183,7 @@ void CTAcccessWindow::OnSize()
 
     //// Find the client area of the application.
     GetClientRect(m_hWnd, &rcWindow);
+    width = rcWindow.right - rcWindow.left - 4;
 
     //// Subtract the area of the rebar control.
     GetClientRect(m_TaToolbar.GetHwnd(), &rcControl);
@@ -191,10 +192,14 @@ void CTAcccessWindow::OnSize()
     if (!m_DlgCopyright.CopyrightHidded())
     {
         MoveWindow(m_DlgCopyright.GetHwnd(), rcWindow.left + 2, rcWindow.top + 1,
-            rcWindow.right - rcWindow.left - 4, WINDOW_COPYRIGHT_HEIGHT, true);
+            width, m_DlgCopyright.Height(), true);
 
         GetClientRect(m_DlgCopyright.GetHwnd(), &rcControl);
         rcWindow.top += rcControl.bottom;
+    }
+    else
+    {
+        rcWindow.top += 1;
     }
 
     GetClientRect(m_TaStatusbar.GetHwnd(), &rcControl);

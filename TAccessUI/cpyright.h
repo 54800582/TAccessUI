@@ -1,7 +1,7 @@
 #pragma once
 #include "basedlg.h"
 
-#define WINDOW_COPYRIGHT_HEIGHT  120
+#define WINDOW_COPYRIGHT_HEIGHT  180
 class CDlgCopyright :
     public CBaseDlg
 {
@@ -14,6 +14,8 @@ private:
 
     HFONT m_hDpiFont{ NULL };  //为版本信息准备字体
 
+    DWORD m_dwHeight{ WINDOW_COPYRIGHT_HEIGHT };
+
     HFONT CreateFont(HWND hWnd);
 
 protected:
@@ -25,6 +27,7 @@ protected:
 
 public:
     BOOLEAN CopyrightHidded() { return m_bHideCopyrigth; }
+    DWORD Height() { return m_dwHeight; }
 
 };
 
