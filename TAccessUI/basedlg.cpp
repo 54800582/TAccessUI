@@ -67,7 +67,7 @@ LRESULT CBaseDlg::OnReceiveMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg)
     {
-    case WM_CLOSE:
+    case WM_DESTROY:
     {
         EnterCriticalSection(&m_CriticalSection);
         m_DlgInstancesMap.erase(GetHwnd());

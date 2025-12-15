@@ -20,8 +20,11 @@ public:
 	BOOLEAN Create(HWND hWnd, HINSTANCE hInst, DWORD_PTR id = 0xE800);
 	HWND GetHwnd() const { return m_hWndToolbar; }
 
-	void AddButton(int idIcon/*iBitmap*/, int idCommad, BOOLEAN bEnabled = TRUE, int fsStyle = TBSTYLE_BUTTON, int iImageSize= 32);
+	void AddButton(int idIcon/*iBitmap*/, int idCommad, BOOLEAN bEnabled = TRUE, int fsStyle = TBSTYLE_BUTTON, int iImageSize= 24);
+	void AddButton(TBBUTTON* tbBtn, int iImageSize = 24);
 	void AddSeperator();
+
+	void SetCheck(int idCommad, int nCheck = 1);
 
 	LRESULT ToolbarWndProc(UINT message, WPARAM wParam, LPARAM lParam);
 };
@@ -66,6 +69,22 @@ public:
 	HWND GetHwnd() const { return m_hWnd; }
 
 	void SetText(int nPart, TCHAR* pszText);
+	void SetPaneText(int nPart, TCHAR* pszText)
+	{
+		SetText(nPart, pszText);
+	}
+
+public:
+	static CTAStatusBar& Instance()
+	{
+		static CTAStatusBar theInstance;
+		static BOOLEAN m_bInited = FALSE;
+		if (!m_bInited)
+		{
+			m_bInited = TRUE;
+		}
+		return theInstance;
+	}
 
 };
 

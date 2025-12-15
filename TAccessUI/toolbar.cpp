@@ -69,7 +69,7 @@ void CTAToolbar::AddButton(int idIcon/*iBitmap*/, int idCommand, BOOLEAN bEnable
         tbBtn.iBitmap = MAKELONG(nImage, 0);
         tbBtn.idCommand = idCommand;
         tbBtn.fsState = bEnabled ? TBSTATE_ENABLED : 0;
-        tbBtn.fsStyle = fsStyle;// | BTNS_AUTOSIZE;
+        tbBtn.fsStyle = fsStyle | BTNS_AUTOSIZE;
         //tbBtn.iString = (INT_PTR)_T("TEXT");
     }
     else
@@ -77,6 +77,20 @@ void CTAToolbar::AddButton(int idIcon/*iBitmap*/, int idCommand, BOOLEAN bEnable
         tbBtn.fsStyle = BTNS_SEP;
     }
     result = SendMessageW(m_hWndToolbar, TB_INSERTBUTTON, -1, (LPARAM)&tbBtn);
+}
+
+void CTAToolbar::AddButton(TBBUTTON* tbBtn, int iImageSize)
+{
+    if (tbBtn->idCommand != 0)
+    {
+        HICON hIcon = (HICON)LoadImage(m_hInst, MAKEINTRESOURCE(tbBtn->iBitmap), IMAGE_ICON, iImageSize, iImageSize, 0);
+        int nImage = ImageList_ReplaceIcon(m_hImageList, -1, hIcon);
+
+        tbBtn->iBitmap = MAKELONG(nImage, 0);
+        tbBtn->fsStyle |= BTNS_AUTOSIZE;
+    }
+    
+    SendMessageW(m_hWndToolbar, TB_INSERTBUTTON, -1, (LPARAM)tbBtn);
 }
 
 void CTAToolbar::AddSeperator()
@@ -90,15 +104,21 @@ void CTAToolbar::AddSeperator()
     result = SendMessageW(m_hWndToolbar, TB_INSERTBUTTON, -1, (LPARAM)&tbBtn);
 }
 
+void CTAToolbar::SetCheck(int idCommad, int nCheck)
+{
+    SendMessageW(m_hWndToolbar, TB_CHECKBUTTON, (WPARAM)idCommad, (LPARAM)nCheck);
+}
+
 BOOLEAN CTAToolbar::Create(HWND hWndParent, HINSTANCE hInst, DWORD_PTR id )
 {
     m_hMainWnd = hWndParent;
     m_hInst = hInst;
 
+    //https://learn.microsoft.com/zh-cn/windows/win32/controls/toolbar-control-and-button-styles
     //5600094Ch
     DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CCS_NODIVIDER;
     dwStyle |= TBSTYLE_FLAT | TBSTYLE_TOOLTIPS;
-    //dwStyle |= TBSTYLE_LIST; //按钮右侧会有文字占位符，需要BTNS_AUTOSIZE来消除
+    dwStyle |= TBSTYLE_LIST; //按钮右侧会有文字占位符，需要BTNS_AUTOSIZE来消除
     //dwStyle |= TBSTYLE_DROPDOWN | TBSTYLE_GROUP;使用这两个风格，不会自动显示Toolbar
 
     HIMAGELIST hImageList = nullptr;
@@ -109,7 +129,7 @@ BOOLEAN CTAToolbar::Create(HWND hWndParent, HINSTANCE hInst, DWORD_PTR id )
         TOOLBARCLASSNAME,//_T("ToolbarWindow32"),
         nullptr,
         dwStyle,
-        CW_USEDEFAULT, 0, 200, 0,
+        CW_USEDEFAULT, CW_USEDEFAULT, 200, 0,
         hWndParent,
         reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)),
         hInst, 0);
@@ -398,11 +418,18 @@ CTAStatusBar::~CTAStatusBar()
 
 void CTAStatusBar::OnInitialUpdate()
 {
-#define PANEL_NUM 3
-    int array[PANEL_NUM] = { 120,120 * 2,-1 };
+#define PANEL_NUM 8
+    int array[PANEL_NUM] = { 120, 120 + 150, 120 + 150 * 2, 120 + 150 * 3, 120 + 150 * 4,
+        120 + 150 * 5, 120 + 150 * 6, -1 // 120 + 150 * 7
+};
     SendMessage(m_hWnd, SB_SETPARTS, (WPARAM)PANEL_NUM, (LPARAM)array); //设置面板个数
-    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)1, (WPARAM)TEXT("")); //设置第二个面板内容
-    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)2, (WPARAM)TEXT("")); //设置第三个面板内容
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)1, (WPARAM)TEXT("端点数: ")); //设置第二个面板内容
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)2, (WPARAM)TEXT("Established: ")); //设置第三个面板内容
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)3, (WPARAM)TEXT("Listening: "));
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)4, (WPARAM)TEXT("Time Wait: "));
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)5, (WPARAM)TEXT("Close Wait : "));
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)6, (WPARAM)TEXT("刷新速度: "));
+    SendMessage(m_hWnd, SB_SETTEXT, (LPARAM)7, (WPARAM)TEXT("状态: 全部"));
 }
 
 BOOLEAN CTAStatusBar::Create(HWND hWnd, HINSTANCE hInst, DWORD_PTR id)

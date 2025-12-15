@@ -17,13 +17,20 @@ private:
 	CTAccessView m_TaccessView;
 	CTAToolbar m_TaToolbar;
 	CTARebar m_TaRebar;
-	CTAStatusBar m_TaStatusbar;
+	CTAStatusBar& m_TaStatusbar{ CTAStatusBar::Instance() };
 	CDlgQuickSearch m_DlgQuickSearch;
 	CDlgCopyright m_DlgCopyright;
+
+	BOOLEAN m_bAlwaysOnTop{ FALSE };
+	DWORD m_dwUpdateSpeed{ 2000 };
+	DWORD m_dwLastUpdateSpeed{ 2000 };
 
 private:
 	HMENU m_hMenu{ nullptr };
 	void AddMenuRunas();
+	void OnInitMenuPopup(WPARAM wParam, LPARAM lParam);
+	void OnPauseResume();
+	void OnUpdateSpeed(UINT nCommandID);
 
 	// Message handlers
 private:

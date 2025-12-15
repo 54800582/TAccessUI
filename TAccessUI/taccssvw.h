@@ -12,6 +12,8 @@ const COLORREF rgbGreen_L = 0x000C000;
 
 const COLORREF rgbGroup = 0xFFD0D0;
 
+#define ID_EVENT_SCHEDULE_UPDATE  10801
+
 class CTAccessView
 {
 public:
@@ -21,6 +23,7 @@ public:
 private:
 
 	HWND m_hWnd{ nullptr };
+	HWND m_hHeaderWnd{ nullptr };
 
 	HWND m_hMainWnd{ nullptr };
 	HINSTANCE m_hInst{ nullptr };
@@ -34,14 +37,27 @@ private:
 	void RedrawItems();
 
 	void GetDispInfo(LVITEM* pItem);
+	int FindItem(int /*iStart*/, LVFINDINFO* /*plvfi*/);
+	void OnNMDoubleClick(NMHDR* pHdr);
+	void OnColumnClick(NMHDR* pNotifyStruct);
+	void OnPopupMenu(WPARAM wParam, LPARAM lParam);
+
+private:
+	int m_sortColumnCur{ -1 };
+	int m_nColumnCounter{ 0 };  //同一列单击逢三取消排序  
+	int m_sortType;  //0:descend 1: ascend
 
 public:
 	BOOLEAN Create(HWND hWnd, HINSTANCE hInst);
 	HWND GetHwnd() const { return m_hWnd; }
 
-	LRESULT OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam);
+	INT GetSelectedItem();
+
+	LRESULT OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	LRESULT OnCustomDraw(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 
 	void RefershNow();
+	void OnEditCopy();
+	void OnFont();
 };
 

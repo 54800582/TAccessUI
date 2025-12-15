@@ -129,5 +129,14 @@
     <Image Include="res\close.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\icon1.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\runas.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\update.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

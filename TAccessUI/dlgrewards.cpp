@@ -74,6 +74,7 @@ LRESULT CDlgRewards::OnReceiveMessage(UINT msg, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
             case IDOK:
+            case IDCANCEL: //WM_CLOSE事件会触发IDOK
                 EndDialog(GetHwnd(), LOWORD(wParam));
                 return TRUE;
             default:

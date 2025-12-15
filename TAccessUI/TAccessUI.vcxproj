@@ -169,11 +169,14 @@
     <Image Include="res\close10.png" />
     <Image Include="res\copy.ico" />
     <Image Include="res\find.ico" />
+    <Image Include="res\icon1.ico" />
     <Image Include="res\properties.ico" />
     <Image Include="res\qfilter.ico" />
     <Image Include="res\refresh.ico" />
     <Image Include="res\registry.ico" />
+    <Image Include="res\runas.ico" />
     <Image Include="res\ta-logo.ico" />
+    <Image Include="res\update.ico" />
     <Image Include="res\wmi.ico" />
     <Image Include="small.ico" />
     <Image Include="TAccessUI.ico" />

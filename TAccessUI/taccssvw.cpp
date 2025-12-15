@@ -39,7 +39,8 @@ CTAccessView::~CTAccessView()
 
 void CTAccessView::OnInitialUpdate()
 {
-    DWORD dwExStyle = LVS_EX_DOUBLEBUFFER | LVS_EX_INFOTIP | LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES;//0x10424
+    DWORD dwExStyle = LVS_EX_DOUBLEBUFFER | LVS_EX_INFOTIP | LVS_EX_FULLROWSELECT;
+    //dwExStyle |= LVS_EX_CHECKBOXES;//show checkbox style
     ListView_SetExtendedListViewStyle(m_hWnd, dwExStyle);
 
     
@@ -98,6 +99,7 @@ void CTAccessView::OnInitialUpdate()
     RtlZeroMemory(&lvc, sizeof LV_COLUMN);
 
     HWND hHeader = ListView_GetHeader(m_hWnd);
+    m_hHeaderWnd = hHeader;
 
     lvc.mask = LVCF_FMT | LVCF_TEXT | LVCF_WIDTH;
     lvc.fmt = LVCFMT_LEFT;
@@ -125,6 +127,11 @@ void CTAccessView::OnInitialUpdate()
     lvc.cx = 0x78 * 1.5;
     ListView_InsertColumn(m_hWnd, Header_GetItemCount(hHeader), &lvc);
 
+    if (IsElevated())
+    {
+        //插入特权列
+    }
+
     //ListView_EnableGroupView(m_hWnd, TRUE);
 
     ShowWindow(m_hWnd, SW_SHOW);
@@ -138,6 +145,7 @@ void CTAccessView::RedrawItems()
     DWORD countPerPage = 0;
     DWORD idxTop = 0;
 
+    itemCount = 10;
     ListView_SetItemCountEx(m_hWnd, itemCount, LVSICF_NOINVALIDATEALL | LVSICF_NOSCROLL);
     //itemCount =  ListView_GetItemCount(GetListCtrl().GetSafeHwnd());
     countPerPage = ListView_GetCountPerPage(m_hWnd);
@@ -181,16 +189,17 @@ void CTAccessView::GetDispInfo(LVITEM* pItem)
     BOOLEAN bGroup = FALSE;
     if ((pItem->mask & LVIF_INDENT) == LVIF_INDENT)
     {
-        if (bGroup)
-            pItem->iIndent = -1;
-        else
-            pItem->iIndent = 1;
+        //if (bGroup)
+        //    pItem->iIndent = -1;
+        //else
+        //    pItem->iIndent = 1;
     }
 
     if ((pItem->mask & LVIF_TEXT) == LVIF_TEXT)
     {
         // then display the appropriate column
         pItem->pszText[0] = _T('\0');
+        _tcscpy_s(pItem->pszText, pItem->cchTextMax, _T("Test"));
         switch (pItem->iSubItem)
         {
         case 0:
@@ -242,8 +251,9 @@ BOOLEAN CTAccessView::Create(HWND hWnd, HINSTANCE hInst)
     DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_NOTIFY;
 
     //0x5600904D
-    dwStyle = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_NOSORTHEADER | WS_VSCROLL | WS_HSCROLL
-        | LVS_OWNERDATA | LVS_SHAREIMAGELISTS | LVS_SHOWSELALWAYS | LVS_SINGLESEL | LVS_REPORT;
+    dwStyle = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VSCROLL | WS_HSCROLL;
+    dwStyle |= LVS_OWNERDATA | LVS_SHAREIMAGELISTS | LVS_SHOWSELALWAYS | LVS_SINGLESEL | LVS_REPORT;
+    //dwStyle |= LVS_NOSORTHEADER; //固化表头，不可单击排序
 
     HWND hWndLv = CreateWindowEx(0/*WS_EX_CLIENTEDGE*/, 
         WC_LISTVIEW, //_T("SysListView32")
@@ -263,7 +273,149 @@ BOOLEAN CTAccessView::Create(HWND hWnd, HINSTANCE hInst)
     return TRUE;
 }
 
-LRESULT CTAccessView::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam)
+int CTAccessView::FindItem(int iStart, LVFINDINFO* plvfi)
+{
+    int nItem = 0;
+
+    nItem = ListView_GetNextItem(m_hWnd, -1, LVIS_SELECTED);
+    if (nItem == -1)
+        return -1;
+
+    int count = ListView_GetItemCount(m_hWnd);
+    TCHAR szItemText[MAX_PATH];
+    int cchFind = _tcslen(plvfi->psz);
+    for (int idx = nItem; idx < nItem + count; idx++)
+    {//从当前选择行开始搜索
+        szItemText[0] = _T('\0');
+        ListView_GetItemText(m_hWnd, idx % count, 0, szItemText, MAX_PATH);
+        if (_tcsnicmp(szItemText, plvfi->psz, cchFind) == 0)
+        {
+            return (idx % count);
+        }
+    }
+    return -1;
+}
+
+void CTAccessView::OnNMDoubleClick(NMHDR* pHdr)
+{
+    POINT point;
+    GetCursorPos(&point);
+    ScreenToClient(m_hWnd, &point);
+
+    LVHITTESTINFO testInfo;
+    testInfo.pt = point;
+    testInfo.flags = 0;
+    testInfo.iGroup = 0;
+    testInfo.iItem = 0;
+    testInfo.iSubItem = 0;
+    int nItem = ListView_SubItemHitTest(m_hWnd, &testInfo);
+
+    if (nItem == -1
+        || testInfo.iItem == -1)
+        return;
+
+    //处理双击表格行的事件，例如打开对应的属性Dialog
+}
+
+void CTAccessView::OnPopupMenu(WPARAM wParam, LPARAM lParam)
+{
+    NMHDR* phdr = (NMHDR*)lParam;
+    POINT point{ 0, 0 }, mpt{ 0, 0 };
+    GetCursorPos(&point);
+    mpt = point;
+    ScreenToClient(m_hHeaderWnd, &point);
+    HDHITTESTINFO hdHitTestInfo;
+    hdHitTestInfo.pt = point;
+    hdHitTestInfo.flags = 0;
+    hdHitTestInfo.iItem = -1;
+    LRESULT result = SendMessage(m_hHeaderWnd, HDM_HITTEST, 0, (LPARAM)&hdHitTestInfo);
+    if (result >= 0)
+        return;
+
+    LVHITTESTINFO lvHitTestInfo;
+    lvHitTestInfo.pt = point;
+    lvHitTestInfo.flags = 0;
+    lvHitTestInfo.iItem = 0;
+    lvHitTestInfo.iSubItem = 0;
+    lvHitTestInfo.iGroup = 0;
+    ListView_SubItemHitTest(m_hWnd, &lvHitTestInfo);
+    if (lvHitTestInfo.iItem < 0)
+        return;
+
+    HMENU hLoadMenu = LoadMenu(m_hInst, MAKEINTRESOURCE(IDM_LIST_MENU));
+    HMENU hMenu = GetSubMenu(hLoadMenu, 0);
+
+    BOOLEAN bEnabled = TRUE;
+    EnableMenuItem(hMenu, IDM_PROPERTIES, MF_BYCOMMAND | (bEnabled ? MF_ENABLED : MF_DISABLED));
+ 
+
+    TrackPopupMenu(hMenu, TPM_LEFTALIGN, mpt.x, mpt.y, 0, m_hMainWnd, nullptr);
+    DestroyMenu(hMenu);
+}
+
+void CTAccessView::OnColumnClick(NMHDR* pNotifyStruct)
+{
+    NM_LISTVIEW* pnmlv = (NM_LISTVIEW*)pNotifyStruct;
+    if (m_sortColumnCur == -1)
+    {
+        //m_sortColumnCur = 0;
+        m_sortType = 1;
+        m_nColumnCounter = 1;
+    }
+    else if (pnmlv->iSubItem == m_sortColumnCur)
+    {
+        //m_sortImageCur = m_sortImageCur == 0 ? 1 : 0;
+        m_nColumnCounter++;
+        if (m_nColumnCounter != 3)
+        {
+            m_sortType = m_sortType == 0 ? 1 : 0;
+        }
+        else
+        {
+            m_sortType = -1;
+            m_nColumnCounter = 1;
+        }
+    }
+    else
+    {
+        m_nColumnCounter = 1;
+    }
+
+    //set first column ascend image
+    HDITEM hdItem;
+    hdItem.mask = HDI_FORMAT;
+    HWND hHeader = ListView_GetHeader(m_hWnd);
+    Header_GetItem(hHeader, m_sortColumnCur, &hdItem);
+    //hdItem.fmt &= ~(HDF_BITMAP_ON_RIGHT | HDF_IMAGE);
+    //hdItem.iImage = 0;
+    hdItem.fmt &= ~(HDF_BITMAP | HDF_SORTUP | HDF_SORTDOWN);
+    Header_SetItem(hHeader, m_sortColumnCur, &hdItem);
+
+    if (m_sortType != -1)
+    {
+        m_sortColumnCur = pnmlv->iSubItem;
+
+        hdItem.mask = HDI_FORMAT;
+        Header_GetItem(hHeader, m_sortColumnCur, &hdItem);
+        hdItem.fmt |= ((m_sortType == 0) ? HDF_SORTDOWN : HDF_SORTUP);
+        Header_SetItem(hHeader, m_sortColumnCur, &hdItem);
+    }
+    else {
+        m_sortColumnCur = -1;
+    }
+
+    //执行排序
+    //sort()
+
+    DWORD countPerPage = 0;
+    DWORD idxTop = 0;
+
+    countPerPage = ListView_GetCountPerPage(m_hWnd);
+    idxTop = ListView_GetTopIndex(m_hWnd);
+    ListView_RedrawItems(m_hWnd, idxTop, idxTop + countPerPage);
+}
+
+LRESULT CTAccessView::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
     if (message != WM_NOTIFY)
     {
@@ -290,9 +442,25 @@ LRESULT CTAccessView::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam)
     case LVN_ODFINDITEM:
     {
         NMLVFINDITEM* pFindItem = (NMLVFINDITEM*)lParam;
-            
+        int i = FindItem(pFindItem->iStart, &pFindItem->lvfi);
+        if (pResult != NULL)
+        {
+            *pResult = i;
+        }
         return 1;
     }
+
+    case LVN_COLUMNCLICK:
+        OnColumnClick(phdr);
+        return 1;
+
+    case NM_RCLICK:
+        OnPopupMenu(wParam, lParam);
+        return 1;
+
+    case NM_DBLCLK:
+        OnNMDoubleClick(phdr);
+        return 1;
 
     default:
         break;
@@ -326,7 +494,7 @@ LRESULT CTAccessView::OnCustomDraw(UINT message, WPARAM wParam, LPARAM lParam, L
     {
         //*pResult = CDRF_NOTIFYSUBITEMDRAW;
         BOOLEAN bGroup = FALSE;
-        BOOLEAN bImagePahtExisted = FALSE;
+        BOOLEAN bImagePathExisted = TRUE;
         BOOLEAN bVerifyCodeSignatures = FALSE;
         if (bGroup)
         {
@@ -390,7 +558,7 @@ LRESULT CTAccessView::OnCustomDraw(UINT message, WPARAM wParam, LPARAM lParam, L
             *pResult = CDRF_SKIPDEFAULT;  //将不会触发LVN_GETDISPINFO消息
             return 1;
         }
-        else if (!bImagePahtExisted)
+        else if (!bImagePathExisted)
         {
             pNMLVCD->clrTextBk = rgbYellow_L;
         }
@@ -403,7 +571,74 @@ LRESULT CTAccessView::OnCustomDraw(UINT message, WPARAM wParam, LPARAM lParam, L
     return 1;
 }
 
+INT CTAccessView::GetSelectedItem()
+{
+    int nItem = 0;
+
+    nItem = ListView_GetNextItem(m_hWnd, -1, LVIS_SELECTED);
+
+    return nItem;
+}
+
 void CTAccessView::RefershNow()
 {
+    //rescan_data();
     RedrawItems();
+}
+
+void CTAccessView::OnEditCopy()
+{
+    int nItem = 0;
+
+    nItem = ListView_GetNextItem(m_hWnd, -1, LVIS_SELECTED);
+    if (nItem == -1)
+        return;
+
+    CString szInfo(_T(""));
+
+    TCHAR strItemText[MAX_PATH] = _T("\0");
+    ListView_GetItemText(m_hWnd, nItem, 0, strItemText, MAX_PATH);
+    szInfo.AppendFormat(_T("%s"), strItemText);
+
+    for (int nColumn = 1; nColumn < Header_GetItemCount(m_hHeaderWnd); nColumn++)
+    {
+        strItemText[0] = 0;
+        ListView_GetItemText(m_hWnd, nItem, nColumn, strItemText, MAX_PATH);
+        szInfo.AppendFormat(_T(", %s"), strItemText);
+    }
+
+    CopyToClipboard(&szInfo);
+}
+
+#include "Commdlg.h"
+#pragma comment(lib, "Comdlg32.lib")
+void CTAccessView::OnFont()
+{
+    HFONT hFont = (HFONT)SendMessage(m_hWnd, WM_GETFONT, 0, 0);
+    LOGFONT lf;
+
+    memset(&lf, 0, sizeof(lf));
+    GetObject(hFont, sizeof LOGFONT, &lf);
+
+    CHOOSEFONT cf;            // common dialog box structure
+    //static LOGFONT lf;        // logical font structure
+    //static DWORD rgbCurrent;  // current text color
+    //HFONT hfont, hfontPrev;
+    //DWORD rgbPrev;
+
+    // Initialize CHOOSEFONT
+    ZeroMemory(&cf, sizeof(cf));
+    cf.lStructSize = sizeof(cf);
+    cf.hwndOwner = m_hWnd;
+    //cf.hwndOwner = GetActiveWindow();
+    cf.lpLogFont = &lf;
+    cf.rgbColors = 0;
+    //cf.Flags = CF_SCREENFONTS | CF_EFFECTS;
+    cf.Flags = CF_NOVERTFONTS | CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS;
+
+    if (ChooseFont(&cf) == TRUE)
+    {
+        hFont = CreateFontIndirect(cf.lpLogFont);
+        SendMessage(m_hWnd, WM_SETFONT, (WPARAM)hFont, 1);
+    }
 }
