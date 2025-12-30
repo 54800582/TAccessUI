@@ -41,6 +41,7 @@ private:
 	void OnNMDoubleClick(NMHDR* pHdr);
 	void OnColumnClick(NMHDR* pNotifyStruct);
 	void OnPopupMenu(WPARAM wParam, LPARAM lParam);
+	void OnItemChanged(NMHDR* pHdr);
 
 private:
 	int m_sortColumnCur{ -1 };

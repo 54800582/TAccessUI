@@ -109,6 +109,11 @@ void CTAToolbar::SetCheck(int idCommad, int nCheck)
     SendMessageW(m_hWndToolbar, TB_CHECKBUTTON, (WPARAM)idCommad, (LPARAM)nCheck);
 }
 
+void CTAToolbar::SetEnable(int idCommad, BOOLEAN nEnabled)
+{
+    SendMessageW(m_hWndToolbar, TB_ENABLEBUTTON, (WPARAM)idCommad, (LPARAM)nEnabled);
+}
+
 BOOLEAN CTAToolbar::Create(HWND hWndParent, HINSTANCE hInst, DWORD_PTR id )
 {
     m_hMainWnd = hWndParent;
@@ -150,6 +155,8 @@ LRESULT CTAToolbar::ToolbarWndProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
     LPTOOLTIPTEXT lpToolTipText = NULL;
     lpToolTipText = (LPTOOLTIPTEXT)lParam;
+    if (lpToolTipText->hdr.hwndFrom != m_hWndToolbar)
+        return 0;
     if (lpToolTipText->hdr.code == TTN_NEEDTEXT)
     {
         if ((UINT)wParam == 0

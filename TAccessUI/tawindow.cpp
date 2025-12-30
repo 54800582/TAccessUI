@@ -240,6 +240,17 @@ LRESULT CTAcccessWindow::OnReceiveMessage(UINT message, WPARAM wParam, LPARAM lP
             }
             else
             {
+                if (LVN_ITEMCHANGED == pNMHDR->code)
+                {
+                    //根据报表视图所选行的数据来更新Toolbar Button的状态
+                    int nItem = m_TaccessView.GetSelectedItem();
+                    BOOLEAN bEnabled = FALSE;
+                    if (nItem >= 0)
+                    {
+                        bEnabled = TRUE;
+                    }
+                    m_TaToolbar.SetEnable(IDM_PROPERTIES, bEnabled);
+                }
                 return result;
             }
         }

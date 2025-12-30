@@ -67,7 +67,7 @@ void CDlgCopyright::OnInitialUpdate()
     //SendMessage(GetDlgItem(GetHwnd(), IDC_BTN_X), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBitmap);
 
     SetDlgItemText(GetHwnd(), IDC_TA_PUBLISHER, _T("Copyright © 2025 T.Access"));
-    SetDlgItemText(GetHwnd(), IDC_TA_PRODUCTNAME, _T("TAcess通用Window UI框架 v2.0"));
+    SetDlgItemText(GetHwnd(), IDC_TA_PRODUCTNAME, _T("TAccess通用Window UI框架 v2.0"));
     SetDlgItemText(GetHwnd(), IDC_STATIC_RELEASE, __DATE__ _T(" Release"));
     SetDlgItemText(GetHwnd(), IDC_TA_HLINK,
         _T("<a HREF=\"https://github.com/54800582/wintools\">更多工具下载: T.Access - https://github.com/54800582/wintools</a>"));

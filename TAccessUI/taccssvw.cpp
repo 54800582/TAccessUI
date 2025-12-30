@@ -415,6 +415,23 @@ void CTAccessView::OnColumnClick(NMHDR* pNotifyStruct)
     ListView_RedrawItems(m_hWnd, idxTop, idxTop + countPerPage);
 }
 
+void CTAccessView::OnItemChanged(NMHDR* pHdr)
+{
+    LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pHdr);
+    if (pNMLV->uChanged != LVIF_STATE
+        || (pNMLV->uNewState & LVIS_SELECTED) == 0)
+    {
+        return;
+    }
+    int nItem = 0;
+
+    nItem = ListView_GetNextItem(m_hWnd, -1, LVIS_SELECTED);
+    if (nItem == -1)
+    {
+        return;
+    }
+}
+
 LRESULT CTAccessView::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
     if (message != WM_NOTIFY)
@@ -460,6 +477,10 @@ LRESULT CTAccessView::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, 
 
     case NM_DBLCLK:
         OnNMDoubleClick(phdr);
+        return 1;
+
+    case LVN_ITEMCHANGED:
+        OnItemChanged(phdr);
         return 1;
 
     default:

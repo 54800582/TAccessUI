@@ -25,6 +25,7 @@ public:
 	void AddSeperator();
 
 	void SetCheck(int idCommad, int nCheck = 1);
+	void SetEnable(int idCommad, BOOLEAN nEnabled);
 
 	LRESULT ToolbarWndProc(UINT message, WPARAM wParam, LPARAM lParam);
 };
